@@ -10,8 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ebb236c31dad3d24a8c56476da10f1f9, type: 3}
-  m_Name: Skill4
+  m_Name: Apple
   m_EditorClassIdentifier: 
-  skillName: Skill4
-  prereqSkill: {fileID: 11400000, guid: 9ca62aacb89f7774faea23f5d6357912, type: 2}
-  childSkills: []
+  skillName: apple
+  cost: 1

@@ -26,7 +26,9 @@ public class SkillTreeNode
     {
         if(mySkill == null)
         {
-            mySkill = new Skill("New Skill");
+            mySkill = (Skill)Skill.CreateInstance("Skill");
+            AssetDatabase.CreateAsset(mySkill, AssetDatabase.GenerateUniqueAssetPath(Skill.defaultFilePath));
+            Debug.Log($"Created skill at location {Skill.defaultFilePath}");
         }
         skill = mySkill;
         rect = new Rect(position.x, position.y, width, height);
@@ -47,7 +49,7 @@ public class SkillTreeNode
     {
         inPoint.Draw();
         outPoint.Draw();
-        GUI.Box(rect, title, style);
+        GUI.Box(rect, skill.GetName(), style);
     }
 
     public bool ProcessEvents(Event e)
@@ -63,6 +65,7 @@ public class SkillTreeNode
                         GUI.changed = true;
                         isSelected = true;
                         style = selectedNodeStyle;
+                        OpenNodeInInspector();
                     }
                     else
                     {
@@ -93,6 +96,11 @@ public class SkillTreeNode
         }
 
         return false;
+    }
+
+    private void OpenNodeInInspector()
+    {
+        AssetDatabase.OpenAsset(skill.GetInstanceID());
     }
 
     private void ProcessContextMenu()

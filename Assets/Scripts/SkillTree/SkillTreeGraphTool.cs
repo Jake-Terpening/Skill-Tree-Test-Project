@@ -10,6 +10,11 @@ public class SkillTreeGraphTool : EditorWindow
 
     private List<SkillTreeNode> skillNodes;
 
+    private Dictionary<Skill, SkillTreeNode> skillNodeLookup;
+
+    /*[SerializeField]
+    public static STNodeLocationDict savedLocations;*/
+
     private List<Connection> connections;
 
     private GUIStyle nodeStyle;
@@ -23,25 +28,98 @@ public class SkillTreeGraphTool : EditorWindow
     private ConnectionPoint selectedInPoint;
     private ConnectionPoint selectedOutPoint;
 
-    [MenuItem("Window/Node Based Editor")]
+    [MenuItem("Window/Skill Tree Editor")]
     private static SkillTreeGraphTool OpenWindow()
     {
         SkillTreeGraphTool window = GetWindow<SkillTreeGraphTool>();
-        window.titleContent = new GUIContent("Skill Tree Editor");
+        window.titleContent = new GUIContent("Skill Tree Editor");        
         return window;
     }
 
     [UnityEditor.Callbacks.OnOpenAsset(1)]
     public static bool OnOpenSkillTree(int instanceID, int line)
     {
+        Debug.Log("OpenSkillTree");
         SkillTree mySkillTree = EditorUtility.InstanceIDToObject(instanceID) as SkillTree;
         if(mySkillTree!=null)
         {
             SkillTreeGraphTool editorWindow = SkillTreeGraphTool.OpenWindow();
             editorWindow.skillTree = mySkillTree;
+            editorWindow.LoadData();
             return true;
         }
         return false;
+    }
+
+    void OnDestroy()
+    {
+        SaveData();
+    }
+
+    private void LoadData()
+    {
+        if(skillNodeLookup == null)
+        {
+            skillNodeLookup = new Dictionary<Skill, SkillTreeNode>();
+        }
+        if (skillTree.skillList == null)
+        {
+            return;
+        }
+        if(skillTree.nodeLocData == null)
+        {
+            SaveData(); //this will initialize an empty entry to avoid null reference exceptions
+        }
+        foreach (Skill mySkill in skillTree.skillList)
+        {
+            Vector2 pos = skillTree.nodeLocData.Position(mySkill);
+            AddNode(pos, mySkill);
+            /*if (!savedLocations.Tree(skillTree).dataList.dataList.ContainsKey(mySkill)) //puts the skills at position 0,0 if the tree is modified outside of the graph tool
+            {
+                SkillTreeNode node = AddNode(Vector2.zero, mySkill);
+            }
+            else
+            {
+                AddNode(savedLocations[skillTree].dataList[mySkill], mySkill);
+            }*/
+        }        
+        if(skillTree.connectionList == null)
+        {
+            return;
+        }
+        foreach (SkillConnection sc in skillTree.connectionList)
+        {
+            SkillTreeNode inNode = skillNodeLookup[sc.parentSkill];
+            SkillConnection myConnection = sc;
+            foreach(Skill outSkill in myConnection.prerequisiteSkills)
+            {
+                SkillTreeNode outNode = skillNodeLookup[outSkill];
+                if(outNode != null)
+                {
+                    selectedInPoint = inNode.inPoint;
+                    selectedOutPoint = outNode.outPoint;
+                    CreateConnection();
+                }
+            }
+        }
+    }
+
+    private void SaveData()
+    {
+        STNodeLocationData data = new STNodeLocationData(skillTree);
+        if (skillNodes == null)
+        {
+            skillNodes = new List<SkillTreeNode>();
+        }
+        foreach (SkillTreeNode node in skillNodes)
+        {
+            data.AddEntry(node.skill, node.rect.position);
+        }
+        /*if(skillTree.nodeLocData ==null)
+        {
+            skillTree.nodeLocData = new STNodeLocationData(skillTree);
+        }*/
+        skillTree.nodeLocData = data;
     }
 
     private void OnEnable()
@@ -49,10 +127,14 @@ public class SkillTreeGraphTool : EditorWindow
         nodeStyle = new GUIStyle();
         nodeStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1.png") as Texture2D;
         nodeStyle.border = new RectOffset(12, 12, 12, 12);
+        nodeStyle.alignment = TextAnchor.MiddleCenter;
+        nodeStyle.normal.textColor = Color.white;
 
         selectedNodeStyle = new GUIStyle();
         selectedNodeStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1 on.png") as Texture2D;
         selectedNodeStyle.border = new RectOffset(12, 12, 12, 12);
+        selectedNodeStyle.alignment = TextAnchor.MiddleCenter;
+        selectedNodeStyle.normal.textColor = Color.white;
 
         inPointStyle = new GUIStyle();
         inPointStyle.normal.background = EditorGUIUtility.Load("button_red.png") as Texture2D;
@@ -107,6 +189,7 @@ public class SkillTreeGraphTool : EditorWindow
         Handles.EndGUI();
     }
 
+    //for emergency fixes if something goes wrong.
     private void UpdateSkillNodesToMatchTree()
     {
         if (skillTree != null)
@@ -125,6 +208,7 @@ public class SkillTreeGraphTool : EditorWindow
             if (mismatchFound)
             {
                 skillNodes = new List<SkillTreeNode>();
+                skillNodeLookup = new Dictionary<Skill, SkillTreeNode>();
                 foreach (Skill skill in skillTree.skillList)
                 {
                    // Vector2 position
@@ -208,6 +292,10 @@ public class SkillTreeGraphTool : EditorWindow
                 {
                     OnDrag(e.delta);
                 }
+                else
+                {
+                    Debug.Log($"Ebutton = {e.button}");
+                }
                 break;
         }
     }
@@ -237,12 +325,20 @@ public class SkillTreeGraphTool : EditorWindow
     const string defaultName = "New Skill";
     private void OnClickAddNode(Vector2 mousePosition)
     {
+        SkillTreeNode myNode = AddNode(mousePosition);
+        skillTree.AddSkill(myNode.skill);        
+    }
+
+    private SkillTreeNode AddNode(Vector2 pos, Skill skill = null)
+    {
         if (skillNodes == null)
         {
             skillNodes = new List<SkillTreeNode>();
         }
-
-        skillNodes.Add(new SkillTreeNode(mousePosition, 200, 50, nodeStyle, selectedNodeStyle, inPointStyle, outPointStyle, OnClickInPoint, OnClickOutPoint, OnClickRemoveNode));
+        SkillTreeNode myNode = new SkillTreeNode(pos, 200, 50, nodeStyle, selectedNodeStyle, inPointStyle, outPointStyle, OnClickInPoint, OnClickOutPoint, OnClickRemoveNode, skill);
+        skillNodes.Add(myNode);
+        skillNodeLookup.Add(myNode.skill, myNode);
+        return myNode;
     }
 
 
@@ -285,6 +381,9 @@ public class SkillTreeGraphTool : EditorWindow
     private void OnClickRemoveConnection(Connection connection)
     {
         connections.Remove(connection);
+        Skill parentSkill = connection.inPoint.node.skill;
+        Skill prereqSkill = connection.outPoint.node.skill;
+        skillTree.RemoveConnection(parentSkill, prereqSkill);
     }
 
     private void OnClickRemoveNode(SkillTreeNode node)
@@ -308,8 +407,9 @@ public class SkillTreeGraphTool : EditorWindow
 
             connectionsToRemove = null;
         }
-
         skillNodes.Remove(node);
+        skillNodeLookup.Remove(node.skill);
+        skillTree.RemoveSkill(node.skill);
     }
 
     private void CreateConnection()
@@ -318,8 +418,8 @@ public class SkillTreeGraphTool : EditorWindow
         {
             connections = new List<Connection>();
         }
-
         connections.Add(new Connection(selectedInPoint, selectedOutPoint, OnClickRemoveConnection));
+        skillTree.AddConnection(selectedInPoint.node.skill, selectedOutPoint.node.skill);
     }
 
     private void ClearConnectionSelection()
@@ -330,6 +430,7 @@ public class SkillTreeGraphTool : EditorWindow
 
     private void OnDrag(Vector2 delta)
     {
+        Debug.Log("ON DRAG");
         drag = delta;
 
         if (skillNodes != null)

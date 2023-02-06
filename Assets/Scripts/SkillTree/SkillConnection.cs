@@ -2,17 +2,37 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SkillConnection : MonoBehaviour
+[System.Serializable]
+public class SkillConnection
 {
-    // Start is called before the first frame update
-    void Start()
+    public Skill parentSkill;
+
+    //These are the prerequisites for the parent skill (usually will just be 1)
+    public List<Skill> prerequisiteSkills;
+
+    public bool IsEmpty()
     {
-        
+        return (prerequisiteSkills.Count == 0);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Add(Skill child)
     {
-        
+        prerequisiteSkills.Add(child);
+    }
+    public void Remove(Skill child)
+    {
+        prerequisiteSkills.Remove(child);
+    }
+    public SkillConnection(Skill parent, List<Skill> children = null)
+    {
+        parentSkill = parent;
+        if (children == null)
+        {
+            prerequisiteSkills = new List<Skill>();
+        }
+        else
+        {
+            prerequisiteSkills = children;
+        }
     }
 }

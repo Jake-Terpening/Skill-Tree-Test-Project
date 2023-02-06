@@ -50,17 +50,17 @@ public class SkillButtonObject : MonoBehaviour
     public List<SkillButtonObject> GetChildButtons()
     {
         List<SkillButtonObject> children = new List<SkillButtonObject>();
-        foreach(Skill childSkill in skill.childSkills)
-        {
-            if(skillTree == null)
-            {
-                skillTree = skillTreeGO.skillTree;
-            }
-            if(!children.Contains(skillTreeGO.skillToButtonDict[childSkill]) && (skillTreeGO.skillToButtonDict.ContainsKey(childSkill)))
-            {
-                children.Add(skillTreeGO.skillToButtonDict[childSkill]);
-            }
-        }
+        //foreach(Skill childSkill in skill.childSkills)
+        //{
+        //    if(skillTree == null)
+        //    {
+        //        skillTree = skillTreeGO.skillTree;
+        //    }
+        //    if(!children.Contains(skillTreeGO.skillToButtonDict[childSkill]) && (skillTreeGO.skillToButtonDict.ContainsKey(childSkill)))
+        //    {
+        //        children.Add(skillTreeGO.skillToButtonDict[childSkill]);
+        //    }
+        //}
         return children;
     }
 

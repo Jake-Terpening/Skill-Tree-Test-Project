@@ -10,11 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ebb236c31dad3d24a8c56476da10f1f9, type: 3}
-  m_Name: Skill1
+  m_Name: Banana
   m_EditorClassIdentifier: 
-  skillName: Skill1
-  prereqSkill: {fileID: 0}
-  childSkills:
-  - {fileID: 11400000, guid: 9332a248bd2798540ac128ce5d26d939, type: 2}
-  - {fileID: 11400000, guid: 8227ba89d0558044886df33ff7e3b866, type: 2}
-  - {fileID: 11400000, guid: ed4847e949c171548be86357e2ffbf48, type: 2}
+  skillName: banana
+  cost: 2

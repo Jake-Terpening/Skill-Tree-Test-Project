@@ -42,10 +42,20 @@ public class SkillTreeGameObject : MonoBehaviour
         }
     }
 
+    public List<SkillButtonObject> GetChildButtons(SkillButtonObject skillButton)
+    {
+        List<SkillButtonObject> childButtons = new List<SkillButtonObject>();
+        List<Skill> childSkills = skillTree.GetConnection(skillButton.skill).prerequisiteSkills;
+        foreach (Skill cSkill in childSkills)
+        {
+            childButtons.Add(skillToButtonDict[cSkill]);
+        }
+        return childButtons;
+    }
+
     public void GenerateTreeFromData(int highestRow = 10, float rowDist = 80f, float buttonWidth = 40f, float buttonHeight = 40f, float totalWidth = 400f, float xCenter =0f, float yBottom = 20f )
     {
         List<SkillButtonObject> bottomRow = new List<SkillButtonObject>();
-        skillTree.SyncDataStructures();
         foreach (Skill skill in skillTree.skillList)
         {
             SkillButtonObject sbo = Instantiate<SkillButtonObject>(skillButtonPrefab, this.transform);
@@ -56,18 +66,19 @@ public class SkillTreeGameObject : MonoBehaviour
             float xpos = xCenter;
             float ypos = yBottom;
 
-            Skill prereq = skill.GetPrereqSkill();
-            int numPrereqs = 0;
-            while (prereq != null)
-            {
-                numPrereqs++;
-                prereq = prereq.GetPrereqSkill();
-            }
-            ypos = yBottom + rowDist * numPrereqs;
-            if (numPrereqs == 0)
-            {
-                bottomRow.Add(sbo);
-            }
+            //outdated
+            //Skill prereq = skill.GetPrereqSkill();
+            //int numPrereqs = 0;
+            //while (prereq != null)
+            //{
+            //    numPrereqs++;
+            //    prereq = prereq.GetPrereqSkill();
+            //}
+            //ypos = yBottom + rowDist * numPrereqs;
+            //if (numPrereqs == 0)
+            //{
+            //    bottomRow.Add(sbo);
+            //}
             sboRT.anchoredPosition = new Vector2(xpos, ypos);
         }
         SetXPositions(bottomRow, totalWidth, xCenter);
@@ -83,12 +94,12 @@ public class SkillTreeGameObject : MonoBehaviour
             RectTransform rt = current.gameObject.GetComponent<RectTransform>();
             float xpos = (xCenter - totalWidth / 2) + (subSectionWidth / 2 + subSectionWidth * i);
             rt.anchoredPosition = new Vector2(xpos, rt.anchoredPosition.y);
-            List<SkillButtonObject> children = current.GetChildButtons();
-            if(children.Count>0)
+            List<SkillButtonObject> childButtons = GetChildButtons(current);
+            if(childButtons.Count>0)
             {
-                float horizontalLength = subSectionWidth * (children.Count - 1) / (children.Count);
+                float horizontalLength = subSectionWidth * (childButtons.Count - 1) / (childButtons.Count);
                 CreateConnectingLines(current, horizontalLength);
-                SetXPositions(children, subSectionWidth, xpos);
+                SetXPositions(childButtons, subSectionWidth, xpos);
             }
         }
     }
@@ -96,7 +107,8 @@ public class SkillTreeGameObject : MonoBehaviour
     public void CreateConnectingLines(SkillButtonObject parentButton, float width, float rowDist = 80f)
     {
         parentButton.ActivateConnectingLineUp(true);
-        foreach(SkillButtonObject childButton in parentButton.GetChildButtons())
+        List<SkillButtonObject> childButtons = GetChildButtons(parentButton);
+        foreach (SkillButtonObject childButton in childButtons)
         {
             childButton.ActivateConnectingLineDown(true);
         }

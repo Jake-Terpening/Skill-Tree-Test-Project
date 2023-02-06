@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 209fad2aa759ca8498b22c1141c315dc, type: 3}
+  m_Name: FruitTree
+  m_EditorClassIdentifier: 
+  skillList:
+  - {fileID: 11400000, guid: 778f9dc77671ec74dbe4cee33893afcb, type: 2}
+  - {fileID: 11400000, guid: 91c2878884024844284f981e50127908, type: 2}
+  - {fileID: 11400000, guid: ad28dcbba1056824eb95f05c7b767479, type: 2}
+  connectionList:
+  - parentSkill: {fileID: 11400000, guid: 778f9dc77671ec74dbe4cee33893afcb, type: 2}
+    prerequisiteSkills:
+    - {fileID: 11400000, guid: 91c2878884024844284f981e50127908, type: 2}
+  - parentSkill: {fileID: 11400000, guid: ad28dcbba1056824eb95f05c7b767479, type: 2}
+    prerequisiteSkills:
+    - {fileID: 11400000, guid: 91c2878884024844284f981e50127908, type: 2}
+  skillPoints: 0
+  nodeLocData:
+    skillTree: {fileID: 11400000}
+    dataList:
+    - skill: {fileID: 11400000, guid: 778f9dc77671ec74dbe4cee33893afcb, type: 2}
+      position: {x: 0, y: 0}
+    - skill: {fileID: 11400000, guid: 91c2878884024844284f981e50127908, type: 2}
+      position: {x: 84, y: 329}
+    - skill: {fileID: 11400000, guid: ad28dcbba1056824eb95f05c7b767479, type: 2}
+      position: {x: 287, y: 82}
